@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Divine — Greek Mythology Minecraft Server</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C9A84C;
+    --gold-bright: #FFD700;
+    --soul: #5a7fff;
+    --corrupt: #6b3fa0;
+    --bg: #07070d;
+    --bg2: #0d0d18;
+    --bg3: #111120;
+    --text: #d4ccc0;
+    --text-muted: #7a7268;
+    --border: rgba(201,168,76,0.15);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 3rem;
+    background: rgba(7,7,13,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem; font-weight: 700;
+    color: var(--gold); letter-spacing: 0.2em;
+  }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a {
+    font-size: 0.8rem; font-weight: 400; letter-spacing: 0.12em;
+    color: var(--text-muted); text-decoration: none; text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    position: relative; overflow: hidden;
+    padding: 6rem 2rem 4rem;
+  }
+  .rift-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(107,63,160,0.18) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 50% 55%, rgba(90,127,255,0.08) 0%, transparent 60%);
+  }
+  .particles { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+  .particle {
+    position: absolute; border-radius: 50%;
+    background: var(--gold);
+    animation: float linear infinite;
+    opacity: 0;
+  }
+  @keyframes float {
+    0% { transform: translateY(100vh) translateX(0) scale(0); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.2; }
+    100% { transform: translateY(-10vh) translateX(var(--dx)) scale(1.5); opacity: 0; }
+  }
+  .hero-eyebrow {
+    font-size: 0.72rem; letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.5rem;
+    position: relative; z-index: 1;
+  }
+  .hero-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(5rem, 16vw, 11rem);
+    font-weight: 700; line-height: 0.9;
+    letter-spacing: 0.05em;
+    color: #fff;
+    position: relative; z-index: 1;
+    text-shadow: 0 0 80px rgba(201,168,76,0.25);
+  }
+  .hero-title span { color: var(--gold); }
+  .hero-divider {
+    width: 80px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 2rem auto;
+    position: relative; z-index: 1;
+  }
+  .hero-sub {
+    font-size: 1.05rem; font-weight: 300; line-height: 1.8;
+    color: var(--text); max-width: 520px;
+    position: relative; z-index: 1;
+    margin-bottom: 2.5rem;
+  }
+  .hero-ip {
+    display: inline-flex; align-items: center; gap: 1rem;
+    background: rgba(201,168,76,0.06);
+    border: 0.5px solid rgba(201,168,76,0.3);
+    border-radius: 4px;
+    padding: 0.85rem 2rem;
+    position: relative; z-index: 1;
+  }
+  .ip-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); }
+  .ip-value { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--gold); letter-spacing: 0.1em; }
+  .ip-badge {
+    font-size: 0.65rem; background: rgba(90,127,255,0.15);
+    border: 0.5px solid rgba(90,127,255,0.3); color: #8aacff;
+    padding: 0.2rem 0.6rem; border-radius: 2px; letter-spacing: 0.1em;
+  }
+  .scroll-hint {
+    position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+    z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    color: var(--text-muted); font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    animation: bounce 2s ease-in-out infinite;
+  }
+  .scroll-hint::after {
+    content: ''; display: block;
+    width: 1px; height: 32px;
+    background: linear-gradient(180deg, var(--text-muted), transparent);
+  }
+  @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+
+  /* SECTIONS */
+  section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.7rem; letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 0.75rem;
+  }
+  .section-title {
+    font-family: 'Cinzel', serif; font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 600; color: #fff; line-height: 1.2; margin-bottom: 1rem;
+  }
+  .section-desc { font-size: 0.95rem; color: var(--text-muted); line-height: 1.8; max-width: 560px; }
+  hr.sep {
+    border: none; border-top: 0.5px solid var(--border); margin: 0;
+  }
+
+  /* LORE */
+  #lore { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+  .lore-text p { font-size: 0.95rem; line-height: 1.9; color: var(--text); margin-top: 1.5rem; }
+  .lore-visual {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    height: 380px;
+  }
+  .rift-circle {
+    width: 220px; height: 220px; border-radius: 50%;
+    border: 0.5px solid rgba(107,63,160,0.4);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .rift-circle::before {
+    content: ''; position: absolute; inset: -20px; border-radius: 50%;
+    border: 0.5px solid rgba(90,127,255,0.15);
+  }
+  .rift-circle::after {
+    content: ''; position: absolute; inset: -40px; border-radius: 50%;
+    border: 0.5px solid rgba(201,168,76,0.08);
+  }
+  .rift-inner {
+    width: 130px; height: 130px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(107,63,160,0.5) 0%, rgba(7,7,13,0.9) 70%);
+    border: 0.5px solid rgba(107,63,160,0.6);
+    display: flex; align-items: center; justify-content: center;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 20px rgba(107,63,160,0.3)} 50%{box-shadow:0 0 50px rgba(107,63,160,0.6)} }
+  .rift-glyph { font-family:'Cinzel',serif; font-size:2.5rem; color:var(--corrupt); opacity:0.8; }
+
+  /* SPELLS */
+  #spells { max-width: 1100px; }
+  .spells-header { margin-bottom: 3rem; }
+  .spells-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1px;
+    border: 0.5px solid var(--border); border-radius: 4px; overflow: hidden;
+  }
+  .spell-card {
+    background: var(--bg2);
+    padding: 1.4rem 1.6rem;
+    border-right: 0.5px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
+    transition: background 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .spell-card:hover { background: var(--bg3); }
+  .spell-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+    background: var(--color, transparent);
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .spell-card:hover::before { opacity: 1; }
+  .spell-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+  .spell-name { font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 600; color: #fff; }
+  .spell-lvl {
+    font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gold); background: rgba(201,168,76,0.08);
+    border: 0.5px solid rgba(201,168,76,0.2);
+    padding: 0.15rem 0.5rem; border-radius: 2px;
+  }
+  .spell-combo {
+    font-family: monospace; font-size: 0.8rem; color: var(--soul); margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+  .spell-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+  .spell-cd { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+  /* ARSENAL */
+  #arsenal { max-width: 1100px; }
+  .arsenal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 3rem; }
+  .arsenal-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 4px; padding: 2rem;
+  }
+  .arsenal-card h3 { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--gold); margin-bottom: 0.4rem; }
+  .arsenal-card .type-tag {
+    font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 1rem; display: block;
+  }
+  .arsenal-card p { font-size: 0.88rem; line-height: 1.7; color: var(--text); margin-bottom: 1rem; }
+  .stat-row { display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 0.5px solid var(--border); }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { font-size: 0.8rem; color: var(--text-muted); }
+  .stat-val { font-size: 0.8rem; color: var(--text); font-weight: 500; }
+  .armor-pieces { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.75rem; margin-top: 1rem; }
+  .armor-piece {
+    text-align: center; padding: 0.75rem 0.5rem;
+    background: var(--bg3); border: 0.5px solid var(--border); border-radius: 2px;
+  }
+  .armor-piece .piece-icon { font-size: 1.1rem; margin-bottom: 0.3rem; display: block; }
+  .armor-piece .piece-name { font-size: 0.7rem; color: var(--text-muted); display: block; }
+  .armor-piece .piece-cost { font-size: 0.72rem; color: var(--gold); display: block; margin-top: 0.2rem; }
+
+  /* ENEMIES */
+  #enemies { max-width: 1100px; }
+  .enemies-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 3rem; }
+  .mob-card {
+    background: var(--bg2); border: 0.5px solid var(--border); border-radius: 4px;
+    padding: 1.2rem 1.4rem;
+  }
+  .mob-card.boss {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(107,63,160,0.12), rgba(7,7,13,0.95));
+    border-color: rgba(107,63,160,0.4);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+  }
+  .mob-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+  .mob-name { font-family: 'Cinzel', serif; font-size: 0.9rem; color: #fff; }
+  .mob-name.boss-name { font-size: 1.3rem; color: var(--corrupt); }
+  .difficulty {
+    font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.15rem 0.5rem; border-radius: 2px;
+  }
+  .diff-easy { background: rgba(50,160,80,0.1); color: #5ecb80; border: 0.5px solid rgba(50,160,80,0.2); }
+  .diff-med { background: rgba(220,160,40,0.1); color: #e8b84b; border: 0.5px solid rgba(220,160,40,0.2); }
+  .diff-hard { background: rgba(200,60,60,0.1); color: #e86b6b; border: 0.5px solid rgba(200,60,60,0.2); }
+  .diff-boss { background: rgba(107,63,160,0.15); color: #b88aff; border: 0.5px solid rgba(107,63,160,0.4); }
+  .mob-hp { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+  .mob-hp span { color: var(--text); }
+  .mob-abilities { list-style: none; }
+  .mob-abilities li { font-size: 0.8rem; color: var(--text-muted); padding: 0.2rem 0; padding-left: 0.8rem; position: relative; line-height: 1.5; }
+  .mob-abilities li::before { content: '—'; position: absolute; left: 0; color: var(--border); }
+  .boss-lore { font-size: 0.88rem; line-height: 1.8; color: var(--text); margin-top: 0.5rem; }
+
+  /* JOIN */
+  #join-wrap {
+    background: var(--bg2); border-top: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border);
+    padding: 6rem 2rem;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  #join-wrap::before {
+    content: ''; position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  #join-wrap .section-title { margin-bottom: 0.5rem; }
+  #join-wrap p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2.5rem; }
+  .join-ip {
+    display: inline-flex; align-items: center; gap: 1.5rem;
+    background: var(--bg); border: 0.5px solid rgba(201,168,76,0.25);
+    border-radius: 4px; padding: 1rem 2.5rem;
+    margin-bottom: 1rem;
+  }
+  .join-ip .ip-label { font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); }
+  .join-ip .ip-value { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--gold); letter-spacing: 0.15em; }
+  .join-meta { font-size: 0.78rem; color: var(--text-muted); letter-spacing: 0.1em; }
+
+  /* FOOTER */
+  footer {
+    text-align: center; padding: 2.5rem 2rem;
+    font-size: 0.78rem; color: var(--text-muted); letter-spacing: 0.08em;
+    border-top: 0.5px solid var(--border);
+  }
+  footer span { color: var(--gold); }
+
+  /* UPGRADE BAR */
+  .upgrade-row { margin-top: 1.25rem; }
+  .upgrade-label { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; justify-content: space-between; }
+  .upgrade-bar { height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+  .upgrade-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--gold), #ffec80); }
+
+  @media (max-width: 700px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    #lore { grid-template-columns: 1fr; gap: 2rem; }
+    .lore-visual { display: none; }
+    .arsenal-grid { grid-template-columns: 1fr; }
+    .enemies-grid { grid-template-columns: 1fr; }
+    .mob-card.boss { grid-template-columns: 1fr; }
+    #join-wrap { padding: 4rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">DIVINE</div>
+  <div class="nav-links">
+    <a href="#lore">Lore</a>
+    <a href="#spells">Spells</a>
+    <a href="#arsenal">Arsenal</a>
+    <a href="#enemies">Enemies</a>
+    <a href="#join-wrap">Join</a>
+  </div>
+</nav>
+
+<section id="hero">
+  <div class="rift-bg"></div>
+  <div class="particles" id="particles"></div>
+  <div class="hero-eyebrow">Greek Mythology · Custom RPG · Java 1.21.1</div>
+  <h1 class="hero-title">D<span>I</span>VINE</h1>
+  <div class="hero-divider"></div>
+  <p class="hero-sub">The gods are restless. A corrupted king tears at the veil between worlds. Enter the rift — and fight back.</p>
+  <div class="hero-ip">
+    <div>
+      <div class="ip-label">Server IP</div>
+      <div class="ip-value">play.divine.gg</div>
+    </div>
+    <div class="ip-badge">Java 1.21.1</div>
+  </div>
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<hr class="sep">
+
+<section id="lore">
+  <div class="lore-text">
+    <div class="section-label">The Legend</div>
+    <h2 class="section-title">The Fall of Anax</h2>
+    <p>A king named Anax once bribed Pythia — the Oracle of Delphi — for knowledge no mortal was meant to hold. The gods did not forgive lightly.</p>
+    <p>Banished to a dimension beyond sight, Anax did not die. He festered. His corruption seeped through the barrier between worlds, forming a rift that bleeds darkness into our realm — twisting the land, corrupting its creatures, and warping reality itself.</p>
+    <p>You are one of the few willing to step into the rift. Fight through his champions. Break his hold on this world. Face Anax.</p>
+  </div>
+  <div class="lore-visual">
+    <div class="rift-circle">
+      <div class="rift-inner">
+        <span class="rift-glyph">Ω</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<section id="spells" style="max-width:1100px;margin:0 auto;padding:6rem 2rem;">
+  <div class="spells-header">
+    <div class="section-label">Powers of the Gods</div>
+    <h2 class="section-title">Spell System</h2>
+    <p class="section-desc" style="margin-top:0.5rem;">Master click combos to invoke divine powers. Each spell is unlocked as you level up — from Hermes' wind to Typhon's storm of chaos.</p>
+  </div>
+  <div class="spells-grid">
+
+    <div class="spell-card" style="--color:#88ccff">
+      <div class="spell-top"><span class="spell-name">Hermes</span><span class="spell-lvl">Lv 5</span></div>
+      <div class="spell-combo">L · L · R · R · R</div>
+      <div class="spell-desc">A wind spiral vortex surges around you. Speed II for 10 seconds.</div>
+      <div class="spell-cd">Cooldown: 5s</div>
+    </div>
+
+    <div class="spell-card" style="--color:#ffd700">
+      <div class="spell-top"><span class="spell-name">Apollo</span><span class="spell-lvl">Lv 6</span></div>
+      <div class="spell-combo">L · L · L · R · R · R</div>
+      <div class="spell-desc">A rising golden sun pillar bathes you in light. Regeneration II for 10 seconds.</div>
+      <div class="spell-cd">Cooldown: 30s</div>
+    </div>
+
+    <div class="spell-card" style="--color:#a0d0ff">
+      <div class="spell-top"><span class="spell-name">Athena</span><span class="spell-lvl">Lv 7</span></div>
+      <div class="spell-combo">R · R · L · L · L</div>
+      <div class="spell-desc">An expanding protective ring cleanses Poison, Wither, and Slowness.</div>
+      <div class="spell-cd">Cooldown: 8s</div>
+    </div>
+
+    <div class="spell-card" style="--color:#80ff90">
+      <div class="spell-top"><span class="spell-name">Artemis</span><span class="spell-lvl">Lv 8</span></div>
+      <div class="spell-combo">L · R · L · R · L · R</div>
+      <div class="spell-desc">Loose a fan of three glowing arrows. Each applies Poison II on hit.</div>
+      <div class="spell-cd">Cooldown: 10s</div>
+    </div>
+
+    <div class="spell-card" style="--color:#ffd700">
+      <div class="spell-top"><span class="spell-name">Asclepius</span><span class="spell-lvl">Lv 10</span></div>
+      <div class="spell-combo">L · L · R · R · L · L</div>
+      <div class="spell-desc">Emergency full heal. Clears all negative effects and grants Absorption II.</div>
+      <div class="spell-cd">Cooldown: 2 min</div>
+    </div>
+
+    <div class="spell-card" style="--color:#8866ff">
+      <div class="spell-top"><span class="spell-name">Hades</span><span class="spell-lvl">Lv 12</span></div>
+      <div class="spell-combo">R · L · L · R · L · L</div>
+      <div class="spell-desc">Drain life from your target. Applies Wither II + Slowness. Heals you based on wand level.</div>
+      <div class="spell-cd">Cooldown: 15s</div>
+    </div>
+
+    <div class="spell-card" style="--color:#44aaff">
+      <div class="spell-top"><span class="spell-name">Poseidon</span><span class="spell-lvl">Lv 14</span></div>
+      <div class="spell-combo">R · R · R · L · L · L</div>
+      <div class="spell-desc">A massive wave of water erupts outward, launching all nearby enemies and slowing them.</div>
+      <div class="spell-cd">Cooldown: 18s</div>
+    </div>
+
+    <div class="spell-card" style="--color:#ffe080">
+      <div class="spell-top"><span class="spell-name">Zeus</span><span class="spell-lvl">Lv 15</span></div>
+      <div class="spell-combo">L · R · R · L · R · R</div>
+      <div class="spell-desc">Call down three lightning strikes with an electric shockwave. Launches targets skyward.</div>
+      <div class="spell-cd">Cooldown: 20s</div>
+    </div>
+
+    <div class="spell-card" style="--color:#ff6644">
+      <div class="spell-top"><span class="spell-name">Ares</span><span class="spell-lvl">Lv 16</span></div>
+      <div class="spell-combo">R · L · R · L · R · R</div>
+      <div class="spell-desc">Four waves of fire meteors rain from the sky. Red dust pillars mark impact zones a moment before.</div>
+      <div class="spell-cd">Cooldown: 20s</div>
+    </div>
+
+    <div class="spell-card" style="--color:#aaaaaa">
+      <div class="spell-top"><span class="spell-name">Medusa</span><span class="spell-lvl">Lv 18</span></div>
+      <div class="spell-combo">R · L · L · R · R · L</div>
+      <div class="spell-desc">Petrify your target. Stone spirals rise around them — Slowness X, Blindness, Fatigue for 5 seconds.</div>
+      <div class="spell-cd">Cooldown: 20s</div>
+    </div>
+
+    <div class="spell-card" style="--color:#7788ff">
+      <div class="spell-top"><span class="spell-name">Chronos</span><span class="spell-lvl">Lv 20</span></div>
+      <div class="spell-combo">R · L · R · R · R · L</div>
+      <div class="spell-desc">Mark your position. A spinning portal holds the point. After 8 seconds, you are pulled back.</div>
+      <div class="spell-cd">Cooldown: 25s</div>
+    </div>
+
+    <div class="spell-card" style="--color:#ffcc22">
+      <div class="spell-top"><span class="spell-name">Helios</span><span class="spell-lvl">Lv 22</span></div>
+      <div class="spell-combo">R · R · L · R · R · L</div>
+      <div class="spell-desc">Lock on to a target block. A golden warning pillar appears — then the beam crashes down.</div>
+      <div class="spell-cd">Cooldown: 30s</div>
+    </div>
+
+    <div class="spell-card" style="--color:#cc44ff; grid-column: span 2; background: rgba(107,63,160,0.08);">
+      <div class="spell-top"><span class="spell-name">Typhon — Ultimate</span><span class="spell-lvl">Lv 25</span></div>
+      <div class="spell-combo">R · R · R · R · R · R</div>
+      <div class="spell-desc">Unleash 8 seconds of chaos. Random lightning erupts across a 12-block radius, dealing damage, Blindness, Slowness, and knockback with every strike. Grows stronger every 60 seconds.</div>
+      <div class="spell-cd">Cooldown: 60s</div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="sep">
+
+<section id="arsenal" style="max-width:1100px;margin:0 auto;padding:6rem 2rem;">
+  <div class="section-label">Weapons & Armor</div>
+  <h2 class="section-title">Your Arsenal</h2>
+  <p class="section-desc">Two legendary weapons. One cursed armor set. Each upgradeable up to +10 using Ancient Essence and the Magic Anvil.</p>
+
+  <div class="arsenal-grid">
+
+    <div class="arsenal-card">
+      <h3>Ancient Combo Wand</h3>
+      <span class="type-tag">Primary Weapon · Left / Right Click Combos</span>
+      <p>A relic of divine origin. Used to channel the power of the gods through complex click sequences. Cast spells, drain life, and command the elements.</p>
+      <div class="stat-row"><span class="stat-label">Base damage</span><span class="stat-val">3.0</span></div>
+      <div class="stat-row"><span class="stat-label">Per upgrade</span><span class="stat-val">+1.5 damage</span></div>
+      <div class="stat-row"><span class="stat-label">Max upgrade</span><span class="stat-val">+10</span></div>
+      <div class="stat-row"><span class="stat-label">Upgrade currency</span><span class="stat-val">Ancient Essence</span></div>
+      <div class="stat-row"><span class="stat-label">Upgrade station</span><span class="stat-val">Magic Anvil</span></div>
+      <div class="upgrade-row">
+        <div class="upgrade-label"><span>Success rate at +10</span><span>10%</span></div>
+        <div class="upgrade-bar"><div class="upgrade-fill" style="width:10%"></div></div>
+      </div>
+    </div>
+
+    <div class="arsenal-card">
+      <h3>Soulreaver</h3>
+      <span class="type-tag">Alternative Weapon · Left / Right Click Combos</span>
+      <p>Forged from the essence of the rift itself. The Soulreaver shares the Wand's combo system and upgrade path, with its own distinct visual identity.</p>
+      <div class="stat-row"><span class="stat-label">Base damage</span><span class="stat-val">3.0</span></div>
+      <div class="stat-row"><span class="stat-label">Per upgrade</span><span class="stat-val">+1.5 damage</span></div>
+      <div class="stat-row"><span class="stat-label">Max upgrade</span><span class="stat-val">+10</span></div>
+      <div class="stat-row"><span class="stat-label">Upgrade currency</span><span class="stat-val">Ancient Essence</span></div>
+      <div class="stat-row"><span class="stat-label">Upgrade station</span><span class="stat-val">Magic Anvil</span></div>
+      <div class="upgrade-row">
+        <div class="upgrade-label"><span>Success rate at +1</span><span>100%</span></div>
+        <div class="upgrade-bar"><div class="upgrade-fill" style="width:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="arsenal-card" style="grid-column: 1 / -1;">
+      <h3>Anax Armor</h3>
+      <span class="type-tag">Legendary Armor Set · Forged from Anax Pieces</span>
+      <p>Dark, ancient armor said to have been worn by Anax's elite guard. Forged from the cursed shards of the king's broken realm. At +4 or higher, it surpasses even enchanted Netherite. The full set grants permanent Resistance II — a 20% reduction in all damage taken.</p>
+      <div class="armor-pieces">
+        <div class="armor-piece">
+          <span class="piece-icon">⛑</span>
+          <span class="piece-name">Helmet</span>
+          <span class="piece-cost">3 Pieces · Lv 8</span>
+        </div>
+        <div class="armor-piece">
+          <span class="piece-icon">🦺</span>
+          <span class="piece-name">Chestplate</span>
+          <span class="piece-cost">5 Pieces · Lv 12</span>
+        </div>
+        <div class="armor-piece">
+          <span class="piece-icon">👖</span>
+          <span class="piece-name">Leggings</span>
+          <span class="piece-cost">4 Pieces · Lv 10</span>
+        </div>
+        <div class="armor-piece">
+          <span class="piece-icon">👟</span>
+          <span class="piece-name">Boots</span>
+          <span class="piece-cost">2 Pieces · Lv 5</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="sep">
+
+<section id="enemies" style="max-width:1100px;margin:0 auto;padding:6rem 2rem;">
+  <div class="section-label">Foes of the Rift</div>
+  <h2 class="section-title">Enemies</h2>
+  <p class="section-desc">Every creature in the quest world is corrupted by Anax's influence. Fight through the common ranks — then face his herald.</p>
+
+  <div class="enemies-grid">
+
+    <div class="mob-card">
+      <div class="mob-top"><span class="mob-name">Rift Crawler</span><span class="difficulty diff-easy">Easy</span></div>
+      <div class="mob-hp">HP: <span>25</span> · EXP: <span>15</span></div>
+      <ul class="mob-abilities">
+        <li>Applies Poison II on every hit</li>
+      </ul>
+    </div>
+
+    <div class="mob-card">
+      <div class="mob-top"><span class="mob-name">Shade</span><span class="difficulty diff-easy">Easy</span></div>
+      <div class="mob-hp">HP: <span>40</span> · EXP: <span>20</span></div>
+      <ul class="mob-abilities">
+        <li>Speed burst when you close in</li>
+      </ul>
+    </div>
+
+    <div class="mob-card">
+      <div class="mob-top"><span class="mob-name">Corrupted Villager</span><span class="difficulty diff-med">Medium</span></div>
+      <div class="mob-hp">HP: <span>70</span> · EXP: <span>35</span></div>
+      <ul class="mob-abilities">
+        <li>Weakness AoE when damaged</li>
+      </ul>
+    </div>
+
+    <div class="mob-card">
+      <div class="mob-top"><span class="mob-name">Tainted Soldier</span><span class="difficulty diff-med">Med–Hard</span></div>
+      <div class="mob-hp">HP: <span>100</span> · EXP: <span>50</span></div>
+      <ul class="mob-abilities">
+        <li>Shield bash every 5 seconds</li>
+        <li>High knockback resistance</li>
+        <li>Battle cry buffs nearby soldiers</li>
+      </ul>
+    </div>
+
+    <div class="mob-card">
+      <div class="mob-top"><span class="mob-name">Ashen Warden</span><span class="difficulty diff-med">Med–Hard</span></div>
+      <div class="mob-hp">HP: <span>120</span> · EXP: <span>60</span></div>
+      <ul class="mob-abilities">
+        <li>Wither II on every attack</li>
+        <li>Soul drain every 6 seconds</li>
+        <li>Ashen ground slam every 8s</li>
+      </ul>
+    </div>
+
+    <div class="mob-card">
+      <div class="mob-top"><span class="mob-name">Anax Hound</span><span class="difficulty diff-hard">Hard</span></div>
+      <div class="mob-hp">HP: <span>150</span> · EXP: <span>75</span></div>
+      <ul class="mob-abilities">
+        <li>Extremely fast movement</li>
+        <li>Pounce attack every 8s</li>
+        <li>Hunger + Slowness on bite</li>
+        <li>Howls when wounded</li>
+      </ul>
+    </div>
+
+    <div class="mob-card boss">
+      <div>
+        <div class="mob-top" style="margin-bottom:0.75rem">
+          <span class="mob-name boss-name">Kryos, Herald of Anax</span>
+          <span class="difficulty diff-boss">Boss</span>
+        </div>
+        <div class="mob-hp" style="margin-bottom:1rem">HP: <span>800</span> · EXP: <span>500</span></div>
+        <ul class="mob-abilities">
+          <li>100% knockback immune</li>
+          <li>Wither II on every attack</li>
+          <li>Dark Slam — AoE damage + slowness</li>
+          <li>Soul Chains — Slowness X root</li>
+          <li>Shadow Dash — teleports to you and strikes</li>
+          <li>Corruption Nova — massive area burst</li>
+          <li>Gains permanent Strength + Speed every 60s</li>
+        </ul>
+      </div>
+      <div>
+        <p class="boss-lore">Once a general, now a vessel. Kryos serves as the last wall between you and Anax. His soul-ash aura is visible from across the arena, and his rage grows without limit. Defeating him broadcasts one message to every player on the server:</p>
+        <p class="boss-lore" style="font-style:italic; margin-top:1rem; color:#b88aff; border-left:2px solid rgba(107,63,160,0.4); padding-left:1rem;">"Kryos has been defeated… Anax grows restless."</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div id="join-wrap">
+  <div class="section-label" style="display:block;margin-bottom:0.75rem">Ready?</div>
+  <h2 class="section-title">Enter the Rift</h2>
+  <p>Minecraft Java Edition · Paper 1.21.1 · Custom RPG</p>
+  <div class="join-ip">
+    <div>
+      <div class="ip-label">Server IP</div>
+      <div class="ip-value">play.divine.gg</div>
+    </div>
+  </div>
+  <div class="join-meta">Add to your server list and join — no mods required</div>
+</div>
+
+<footer>
+  &copy; 2025 <span>Divine</span> · Greek Mythology Minecraft Server · Java 1.21.1
+</footer>
+
+<script>
+  const p = document.getElementById('particles');
+  for(let i=0;i<28;i++){
+    const el=document.createElement('div');
+    el.className='particle';
+    const size=Math.random()*2.5+1;
+    const dx=(Math.random()-0.5)*200;
+    el.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;animation-duration:${6+Math.random()*10}s;animation-delay:${Math.random()*8}s;--dx:${dx}px;background:${Math.random()>0.6?'#5a7fff':'#C9A84C'}`;
+    p.appendChild(el);
+  }
+</script>
+</body>
+</html>
